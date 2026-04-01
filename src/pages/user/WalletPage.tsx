@@ -7,19 +7,123 @@ import { Wallet, Plus, ArrowUpRight, ArrowDownRight, RefreshCw, Gift, CreditCard
 
 const QUICK = [100, 500, 1000, 2000, 5000]
 
-const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bgColor: string }> = {
-  CREDIT: { icon: ArrowDownRight, color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  DEBIT: { icon: ArrowUpRight, color: 'text-red-400', bgColor: 'bg-red-500/20' },
-  REFUND: { icon: RefreshCw, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  REFERRAL_BONUS: { icon: Gift, color: 'text-purple-400', bgColor: 'bg-purple-500/20' }
+const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  CREDIT:         { icon: ArrowDownRight, color: '#4A7A52', bg: 'rgba(74,122,82,0.1)'  },
+  DEBIT:          { icon: ArrowUpRight,   color: '#B85450', bg: 'rgba(184,84,80,0.1)'  },
+  REFUND:         { icon: RefreshCw,      color: '#5A7FA8', bg: 'rgba(90,127,168,0.1)' },
+  REFERRAL_BONUS: { icon: Gift,           color: '#C9A96E', bg: 'rgba(201,169,110,0.1)'},
 }
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+*, *::before, *::after { box-sizing: border-box; }
+
+.pc-page { max-width: 900px; margin: 0 auto; font-family: 'DM Sans', sans-serif; }
+
+.pc-eyebrow { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:#8BAF8E; margin-bottom:5px; }
+.pc-title   { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:#1A1F2E; margin-bottom:4px; }
+.pc-sub     { font-size:13.5px; color:#7A8090; font-weight:300; margin-bottom:30px; }
+
+.pc-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:22px; }
+@media(max-width:700px){ .pc-grid2 { grid-template-columns:1fr; } }
+
+/* Balance card */
+.pc-balance-card {
+  border-radius:22px; padding:28px;
+  background:#1A1F2E;
+  position:relative; overflow:hidden;
+}
+.pc-balance-glow1 { position:absolute; width:220px; height:220px; background:radial-gradient(ellipse, rgba(139,175,142,0.18) 0%, transparent 65%); top:-60px; right:-60px; pointer-events:none; }
+.pc-balance-glow2 { position:absolute; width:160px; height:160px; background:radial-gradient(ellipse, rgba(201,169,110,0.12) 0%, transparent 65%); bottom:-40px; left:-40px; pointer-events:none; }
+.pc-balance-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:4px; }
+.pc-balance-sub   { font-size:10px; color:rgba(255,255,255,0.25); margin-bottom:22px; }
+.pc-balance-icon-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.pc-balance-icon-wrap { width:46px; height:46px; border-radius:13px; background:rgba(139,175,142,0.15); border:1px solid rgba(139,175,142,0.2); display:flex; align-items:center; justify-content:center; }
+.pc-balance-amount { font-family:'Playfair Display',serif; font-size:38px; font-weight:700; color:white; line-height:1; margin-bottom:10px; }
+.pc-balance-footer { display:flex; align-items:center; gap:7px; font-size:12px; color:rgba(255,255,255,0.3); }
+
+/* Add money card */
+.pc-card { background:white; border-radius:22px; padding:26px; border:1px solid rgba(26,31,46,0.08); box-shadow:0 4px 20px rgba(26,31,46,0.06); }
+.pc-card-title { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:#1A1F2E; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+
+.pc-quick { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.pc-quick-btn {
+  padding:7px 14px; border-radius:10px; font-size:13px; font-weight:500;
+  border:1.5px solid rgba(26,31,46,0.12); background:#FDFAF5;
+  color:#7A8090; cursor:pointer; transition:all 0.18s;
+  font-family:'DM Sans',sans-serif;
+}
+.pc-quick-btn:hover  { border-color:#8BAF8E; color:#1A1F2E; }
+.pc-quick-btn.active { border-color:#4A7A52; background:rgba(74,122,82,0.08); color:#4A7A52; font-weight:600; }
+
+.pc-input-row { display:flex; gap:10px; }
+.pc-input {
+  flex:1; padding:11px 14px; border-radius:12px;
+  border:1.5px solid rgba(26,31,46,0.1); background:#FDFAF5;
+  font-size:14px; color:#1A1F2E; font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color 0.2s, box-shadow 0.2s;
+}
+.pc-input::placeholder { color:#B8BDC7; }
+.pc-input:focus { border-color:#8BAF8E; box-shadow:0 0 0 3px rgba(139,175,142,0.13); }
+.pc-add-btn {
+  padding:11px 22px; border-radius:12px; border:none;
+  background:#1A1F2E; color:white;
+  font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition:all 0.22s;
+}
+.pc-add-btn:hover:not(:disabled) { background:#4A7A52; }
+.pc-add-btn:disabled { opacity:0.55; cursor:not-allowed; }
+
+/* Txn table */
+.pc-txn-card { background:white; border-radius:22px; padding:26px; border:1px solid rgba(26,31,46,0.08); box-shadow:0 4px 20px rgba(26,31,46,0.06); }
+.pc-table { width:100%; border-collapse:collapse; }
+.pc-thead th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; color:#7A8090; letter-spacing:1.2px; text-transform:uppercase; border-bottom:1px solid rgba(26,31,46,0.08); }
+.pc-thead th:last-child, .pc-thead th:nth-last-child(2) { text-align:right; }
+.pc-tr { border-bottom:1px solid rgba(26,31,46,0.05); transition:background 0.15s; }
+.pc-tr:hover { background:rgba(139,175,142,0.04); }
+.pc-td { padding:13px 14px; font-size:13.5px; color:#1A1F2E; }
+.pc-td.muted { color:#7A8090; }
+.pc-td.right { text-align:right; }
+.pc-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:8px; font-size:11.5px; font-weight:600; }
+.pc-empty { text-align:center; padding:60px 20px; }
+.pc-empty-icon { color:#C0C5CE; margin-bottom:12px; }
+.pc-empty-text { font-size:14px; color:#7A8090; }
+
+.pc-spinner { width:17px; height:17px; border:2px solid rgba(255,255,255,0.25); border-top-color:white; border-radius:50%; animation:pcSpin 0.7s linear infinite; }
+@keyframes pcSpin { to{transform:rotate(360deg)} }
+
+.pc-hide-mobile { display: table-cell; }
+@media (max-width: 767px) {
+  .pc-hide-mobile { display: none; }
+  .pc-page { padding: 20px 16px; }
+  .pc-title { font-size: 24px; }
+  .pc-balance-card { padding: 20px; }
+  .pc-balance-amount { font-size: 30px; }
+  .pc-balance-icon-row { gap: 10px; }
+  .pc-balance-icon-wrap { width: 40px; height: 40px; }
+  .pc-card { padding: 20px; }
+  .pc-card-title { font-size: 16px; }
+  .pc-quick { gap: 6px; }
+  .pc-quick-btn { padding: 6px 12px; font-size: 12px; }
+  .pc-input-row { flex-direction: column; gap: 12px; }
+  .pc-input { padding: 10px 12px; font-size: 13px; }
+  .pc-add-btn { width: 100%; padding: 10px; font-size: 13px; }
+  .pc-txn-card { padding: 20px; }
+  .pc-table { font-size: 12px; }
+  .pc-td { padding: 10px 12px; }
+  .pc-badge { padding: 3px 8px; font-size: 10px; }
+  .pc-empty { padding: 40px 20px; }
+  .pc-empty-icon { font-size: 36px; }
+  .pc-empty-text { font-size: 13px; }
+}
+`
 
 export default function WalletPage() {
   const [balance, setBalance] = useState(0)
-  const [amount, setAmount] = useState('')
-  const [txns, setTxns] = useState<any[]>([])
+  const [amount, setAmount]   = useState('')
+  const [txns, setTxns]       = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const { updateUser } = useAuthStore()
+  const { updateUser }        = useAuthStore()
 
   useEffect(() => {
     userApi.getWallet().then((r) => {
@@ -31,10 +135,7 @@ export default function WalletPage() {
 
   async function add() {
     const a = parseFloat(amount)
-    if (!a || a < 1) {
-      toast.error('Enter valid amount')
-      return
-    }
+    if (!a || a < 1) { toast.error('Enter valid amount'); return }
     setLoading(true)
     try {
       const r = await userApi.addMoney({ amount: a, paymentMethod: 'Online', referenceId: 'TXN' + Date.now() })
@@ -45,182 +146,100 @@ export default function WalletPage() {
       userApi.getTransactions().then((r) => setTxns(r.data.data?.content || []))
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Wallet</h1>
-        <p className="text-text-secondary">Manage your wallet balance</p>
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Balance Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative overflow-hidden rounded-2xl p-6"
-          style={{
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%)'
-          }}
-        >
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <p className="text-white/70 text-sm">Available Balance</p>
-                <p className="text-xs text-white/50">PsychoCare Wallet</p>
-              </div>
-            </div>
-            <div className="text-4xl font-bold text-white mb-2">Rs. {balance.toFixed(2)}</div>
-            <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-white/50" />
-              <span className="text-white/50 text-sm">Virtual Wallet</span>
-            </div>
-          </div>
+    <>
+      <style>{CSS}</style>
+      <div className="pc-page">
+        <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}>
+          <div className="pc-eyebrow">Account</div>
+          <div className="pc-title">My Wallet</div>
+          <div className="pc-sub">Manage your wallet balance and transactions</div>
         </motion.div>
 
-        {/* Add Money Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card p-6"
-        >
-          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-accent-purple" />
-            Add Money
-          </h2>
+        <div className="pc-grid2">
+          {/* Balance Card */}
+          <motion.div className="pc-balance-card" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1 }}>
+            <div className="pc-balance-glow1" />
+            <div className="pc-balance-glow2" />
+            <div style={{ position:'relative', zIndex:1 }}>
+              <div className="pc-balance-icon-row">
+                <div className="pc-balance-icon-wrap"><Wallet size={20} color="#8BAF8E" /></div>
+                <div>
+                  <div className="pc-balance-label">Available Balance</div>
+                  <div className="pc-balance-sub">PsychoCare Wallet</div>
+                </div>
+              </div>
+              <div className="pc-balance-amount">₹{balance.toFixed(2)}</div>
+              <div className="pc-balance-footer"><CreditCard size={13} /> Virtual Wallet</div>
+            </div>
+          </motion.div>
 
-          <div className="flex flex-wrap gap-2 mb-4">
-            {QUICK.map((q) => (
-              <motion.button
-                key={q}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setAmount(String(q))}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  amount === String(q)
-                    ? 'bg-accent-purple text-white shadow-glow-sm'
-                    : 'bg-dark-500/50 text-text-secondary hover:text-white border border-white/10'
-                }`}
-              >
-                Rs. {q}
-              </motion.button>
-            ))}
-          </div>
+          {/* Add Money */}
+          <motion.div className="pc-card" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.15 }}>
+            <div className="pc-card-title"><Plus size={17} color="#4A7A52" /> Add Money</div>
+            <div className="pc-quick">
+              {QUICK.map(q => (
+                <button key={q} className={`pc-quick-btn${amount === String(q) ? ' active' : ''}`} onClick={() => setAmount(String(q))}>
+                  ₹{q}
+                </button>
+              ))}
+            </div>
+            <div className="pc-input-row">
+              <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Enter amount" className="pc-input" />
+              <button onClick={add} disabled={loading} className="pc-add-btn">
+                {loading ? <div className="pc-spinner" /> : 'Add'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
 
-          <div className="flex gap-3">
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="input-field flex-1"
-            />
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={add}
-              disabled={loading}
-              className="btn-primary px-6"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                'Add'
-              )}
-            </motion.button>
-          </div>
+        {/* Transactions */}
+        <motion.div className="pc-txn-card" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }}>
+          <div className="pc-card-title">Transaction History</div>
+          {txns.length === 0 ? (
+            <div className="pc-empty">
+              <Wallet size={44} className="pc-empty-icon" style={{ margin:'0 auto 12px' }} />
+              <div className="pc-empty-text">No transactions yet</div>
+            </div>
+          ) : (
+            <div style={{ overflowX:'auto' }}>
+              <table className="pc-table">
+                <thead className="pc-thead">
+                  <tr>
+                    <th>Date</th><th>Description</th><th>Type</th>
+                    <th style={{textAlign:'right'}}>Amount</th><th className="pc-hide-mobile" style={{textAlign:'right'}}>Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {txns.map((t: any, i: number) => {
+                    const cfg = TYPE_CONFIG[t.type] || TYPE_CONFIG.CREDIT
+                    const Icon = cfg.icon
+                    return (
+                      <motion.tr key={t.id} className="pc-tr"
+                        initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.03 }}>
+                        <td className="pc-td muted">{new Date(t.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td className="pc-td">{t.description}</td>
+                        <td className="pc-td">
+                          <span className="pc-badge" style={{ background: cfg.bg, color: cfg.color }}>
+                            <Icon size={11} />{t.type}
+                          </span>
+                        </td>
+                        <td className="pc-td right" style={{ fontWeight:700, color: t.type==='DEBIT' ? '#B85450' : '#4A7A52' }}>
+                          {t.type==='DEBIT' ? '-' : '+'}₹{t.amount}
+                        </td>
+                        <td className="pc-td right muted pc-hide-mobile">₹{t.balanceAfter?.toFixed(2)}</td>
+                      </motion.tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </motion.div>
       </div>
-
-      {/* Transaction History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="glass-card p-6"
-      >
-        <h2 className="text-lg font-bold text-white mb-6">Transaction History</h2>
-
-        {txns.length === 0 ? (
-          <div className="text-center py-12">
-            <Wallet className="w-12 h-12 mx-auto text-text-muted mb-3" />
-            <p className="text-text-muted">No transactions yet</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Balance
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {txns.map((t: any, i: number) => {
-                  const config = TYPE_CONFIG[t.type] || TYPE_CONFIG.CREDIT
-                  const Icon = config.icon
-                  return (
-                    <motion.tr
-                      key={t.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-text-muted text-sm">
-                        {new Date(t.createdAt).toLocaleDateString('en-IN')}
-                      </td>
-                      <td className="py-4 px-4 text-white text-sm">{t.description}</td>
-                      <td className="py-4 px-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg ${config.bgColor} ${config.color}`}
-                        >
-                          <Icon className="w-3 h-3" />
-                          {t.type}
-                        </span>
-                      </td>
-                      <td
-                        className={`py-4 px-4 text-right font-bold ${t.type === 'DEBIT' ? 'text-red-400' : 'text-green-400'}`}
-                      >
-                        {t.type === 'DEBIT' ? '-' : '+'}Rs. {t.amount}
-                      </td>
-                      <td className="py-4 px-4 text-right text-text-secondary">
-                        Rs. {t.balanceAfter?.toFixed(2)}
-                      </td>
-                    </motion.tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </motion.div>
-    </div>
+    </>
   )
 }

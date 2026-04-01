@@ -1,195 +1,201 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Heart, Check, Dumbbell, Brain, BookOpen, Wind, TreePine, Apple, Moon } from 'lucide-react'
+import { useState } from "react";
+
+const COLORS = {
+  sage: "#8BAF8E",
+  sageLight: "#B8D4BB",
+  sageDark: "#4A7A52",
+  cream: "#F5F0E8",
+  warmWhite: "#FDFAF5",
+  deep: "#1A1F2E",
+  deep2: "#252B3B",
+  charcoal: "#3D4454",
+  gold: "#C9A96E",
+  goldLight: "#E8C98A",
+  muted: "#7A8090",
+  bg: "#F8F5EF",
+};
 
 const MOODS = [
-  { e: 'Happy', icon: '😊', color: 'from-yellow-500 to-orange-500' },
-  { e: 'Neutral', icon: '😐', color: 'from-gray-400 to-gray-500' },
-  { e: 'Sad', icon: '😔', color: 'from-blue-400 to-blue-500' },
-  { e: 'Anxious', icon: '😰', color: 'from-purple-400 to-purple-500' },
-  { e: 'Angry', icon: '😡', color: 'from-red-400 to-red-500' },
-  { e: 'Tired', icon: '😴', color: 'from-indigo-400 to-indigo-500' }
-]
+  { e: "Happy", icon: "😊" },
+  { e: "Neutral", icon: "😐" },
+  { e: "Sad", icon: "😔" },
+  { e: "Anxious", icon: "😰" },
+  { e: "Angry", icon: "😡" },
+  { e: "Tired", icon: "😴" },
+];
 
 const HABITS = [
-  { name: 'Exercise', icon: Dumbbell },
-  { name: 'Meditation', icon: Brain },
-  { name: 'Journaling', icon: BookOpen },
-  { name: 'Reading', icon: BookOpen },
-  { name: 'Deep Breathing', icon: Wind },
-  { name: 'Nature Walk', icon: TreePine },
-  { name: 'Healthy Eating', icon: Apple },
-  { name: 'Adequate Sleep', icon: Moon }
-]
+  { name: "Exercise", icon: "🏃" },
+  { name: "Meditation", icon: "🧘" },
+  { name: "Journaling", icon: "📔" },
+  { name: "Reading", icon: "📚" },
+  { name: "Deep Breathing", icon: "🌬️" },
+  { name: "Nature Walk", icon: "🌿" },
+  { name: "Healthy Eating", icon: "🥗" },
+  { name: "Adequate Sleep", icon: "🌙" },
+];
 
 export default function SelfCareTools() {
-  const [mood, setMood] = useState<string | null>(null)
-  const [habits, setHabits] = useState<string[]>([])
-  const [saved, setSaved] = useState(false)
+  const [mood, setMood] = useState(null);
+  const [habits, setHabits] = useState([]);
+  const [saved, setSaved] = useState(false);
 
-  function toggleHabit(h: string) {
-    setHabits((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]))
+  function toggleHabit(h) {
+    setHabits((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]));
   }
 
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Self Care Tools</h1>
-        <p className="text-text-secondary">Track your mood and healthy habits</p>
-      </motion.div>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px" }}>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Header */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: COLORS.sageDark, fontWeight: 500, marginBottom: 12 }}>
+          Your Wellness
+        </div>
+
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: COLORS.deep, lineHeight: 1.1, marginBottom: 8 }}>
+          Self-Care <em style={{ fontStyle: "italic", color: COLORS.sageDark }}>Tools</em>
+        </h1>
+
+        <p style={{ fontSize: 15, color: COLORS.muted, fontWeight: 300 }}>
+          Track your mood and healthy habits every day.
+        </p>
+      </div>
+
+      {/* 🔥 GRID CENTER FIX */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 28,
+        maxWidth: 900,
+        margin: "0 auto"   // ✅ CENTER
+      }}>
+
         {/* Mood Tracker */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card p-6"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
+        <div style={{ background: "white", borderRadius: 24, padding: 36, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 4px 30px rgba(26,31,46,0.05)" }}>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(139,175,142,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>♡</div>
             <div>
-              <h2 className="font-bold text-white">Mood Tracker</h2>
-              <p className="text-sm text-text-muted">How are you feeling today?</p>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: COLORS.deep }}>Mood Tracker</h2>
+              <p style={{ fontSize: 13, color: COLORS.muted, fontWeight: 300 }}>How are you feeling today?</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
             {MOODS.map((m) => (
-              <motion.button
+              <button
                 key={m.e}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => setMood(m.e)}
-                className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${
-                  mood === m.e
-                    ? 'border-accent-purple bg-accent-purple/10'
-                    : 'border-white/10 bg-dark-500/50 hover:border-white/20'
-                }`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: "16px 8px",
+                  borderRadius: 16,
+                  border: `1.5px solid ${mood === m.e ? COLORS.sageDark : "rgba(26,31,46,0.1)"}`,
+                  background: mood === m.e ? "rgba(139,175,142,0.1)" : "transparent",
+                  cursor: "pointer",
+                }}
               >
-                <span className="text-3xl mb-2">{m.icon}</span>
-                <span
-                  className={`text-xs font-medium ${mood === m.e ? 'text-white' : 'text-text-muted'}`}
-                >
+                <span style={{ fontSize: 28, marginBottom: 6 }}>{m.icon}</span>
+                <span style={{ fontSize: 12, fontWeight: mood === m.e ? 600 : 400, color: mood === m.e ? COLORS.sageDark : COLORS.muted }}>
                   {m.e}
                 </span>
-              </motion.button>
+              </button>
             ))}
           </div>
 
           {mood && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-3 rounded-xl bg-gradient-to-r from-accent-purple/20 to-accent-blue/10 border border-accent-purple/30"
-            >
-              <span className="text-sm text-accent-purple font-medium">
-                Current mood: <span className="text-white">{mood}</span>
+            <div style={{ padding: "14px 20px", borderRadius: 14, background: "rgba(139,175,142,0.08)", border: `1px solid rgba(139,175,142,0.25)`, textAlign: "center" }}>
+              <span style={{ fontSize: 13, color: COLORS.sageDark, fontWeight: 500 }}>
+                Current mood: <strong style={{ color: COLORS.deep }}>{mood}</strong>
               </span>
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Health Habits */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card p-6"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-              <Check className="w-5 h-5 text-white" />
-            </div>
+        <div style={{ background: "white", borderRadius: 24, padding: 36, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 4px 30px rgba(26,31,46,0.05)" }}>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(201,169,110,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>✓</div>
             <div>
-              <h2 className="font-bold text-white">Health Habits</h2>
-              <p className="text-sm text-text-muted">Which habits did you practice today?</p>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: COLORS.deep }}>Health Habits</h2>
+              <p style={{ fontSize: 13, color: COLORS.muted, fontWeight: 300 }}>Which habits did you practice today?</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
             {HABITS.map((h) => {
-              const Icon = h.icon
-              const isSelected = habits.includes(h.name)
+              const isSelected = habits.includes(h.name);
               return (
-                <motion.button
+                <button
                   key={h.name}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={() => toggleHabit(h.name)}
-                  className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                    isSelected
-                      ? 'border-green-500/50 bg-green-500/10'
-                      : 'border-white/10 bg-dark-500/50 hover:border-white/20'
-                  }`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "12px 14px",
+                    borderRadius: 14,
+                    border: `1.5px solid ${isSelected ? COLORS.sage : "rgba(26,31,46,0.1)"}`,
+                    background: isSelected ? "rgba(139,175,142,0.08)" : "transparent",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
                 >
-                  <div
-                    className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
-                      isSelected ? 'bg-green-500 text-white' : 'bg-white/10'
-                    }`}
-                  >
-                    {isSelected && <Check className="w-3 h-3" />}
-                  </div>
-                  <Icon className={`w-4 h-4 ${isSelected ? 'text-green-400' : 'text-text-muted'}`} />
-                  <span
-                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'}`}
-                  >
+                  <span style={{ fontSize: 14 }}>{h.icon}</span>
+                  <span style={{ fontSize: 13, fontWeight: isSelected ? 500 : 400, color: isSelected ? COLORS.deep : COLORS.muted }}>
                     {h.name}
                   </span>
-                </motion.button>
-              )
+                </button>
+              );
             })}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={() => setSaved(true)}
-            className={`w-full py-3 rounded-xl font-semibold transition-all ${
-              saved
-                ? 'bg-green-500 text-white'
-                : 'bg-gradient-primary text-white shadow-glow-sm hover:shadow-glow'
-            }`}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "14px",
+              borderRadius: 14,
+              background: saved ? COLORS.sageDark : COLORS.deep,
+              color: "white",
+              border: "none",
+              fontSize: 14,
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
           >
-            {saved ? 'Saved for Today!' : 'Save for Today'}
-          </motion.button>
-        </motion.div>
+            {saved ? "✓  Saved for Today!" : "Save for Today"}
+          </button>
+        </div>
       </div>
 
-      {/* Summary */}
+      {/* 🔥 SUMMARY CENTER FIX */}
       {(mood || habits.length > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card p-6 mt-6"
-        >
-          <h2 className="font-bold text-white mb-4">Today's Summary</h2>
-          <div className="flex flex-wrap gap-3">
-            {mood && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-purple/10 border border-accent-purple/30">
-                <span className="text-lg">{MOODS.find((m) => m.e === mood)?.icon}</span>
-                <span className="text-sm text-white font-medium">{mood}</span>
-              </div>
-            )}
-            {habits.map((h) => {
-              const habit = HABITS.find((hab) => hab.name === h)
-              const Icon = habit?.icon || Check
-              return (
-                <div
-                  key={h}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/30"
-                >
-                  <Icon className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-white font-medium">{h}</span>
-                </div>
-              )
-            })}
+        <div style={{
+          marginTop: 28,
+          background: "white",
+          borderRadius: 24,
+          padding: 32,
+          border: `1px solid rgba(26,31,46,0.07)`,
+          boxShadow: "0 4px 30px rgba(26,31,46,0.05)",
+          maxWidth: 900,
+          margin: "28px auto 0"  // ✅ CENTER
+        }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: COLORS.deep, marginBottom: 18 }}>
+            Today's Summary
+          </h2>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {mood && <span>{mood}</span>}
+            {habits.map((h) => <span key={h}>{h}</span>)}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
-  )
+  );
 }

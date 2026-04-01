@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 
+import LandingPage from './pages/LandingPage'
+
 import LoginPage from './pages/public/LoginPage'
 import SignupPage from './pages/public/SignupPage'
 import TherapistLoginPage from './pages/public/TherapistLoginPage'
@@ -36,23 +38,34 @@ import AdminUsers from './pages/admin/AdminUsers'
 
 function Guard({ role, children }: { role: string; children: React.ReactNode }) {
   const { role: r, token } = useAuthStore()
+
   if (!token || r !== role) {
-    const map: Record<string, string> = { USER: '/login', THERAPIST: '/therapist/login', ADMIN: '/admin/login' }
+    const map: Record<string, string> = {
+      USER: '/login',
+      THERAPIST: '/therapist/login',
+      ADMIN: '/admin/login'
+    }
     return <Navigate to={map[role] || '/login'} replace />
   }
+
   return <>{children}</>
 }
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* ✅ Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/therapist/login" element={<TherapistLoginPage />} />
       <Route path="/therapist/signup" element={<TherapistSignupPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
 
+      {/* User Routes */}
       <Route path="/user" element={<Guard role="USER"><UserLayout /></Guard>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<UserDashboard />} />
@@ -71,6 +84,7 @@ export default function App() {
         <Route path="knowledge-center" element={<KnowledgeCenter />} />
       </Route>
 
+      {/* Therapist Routes */}
       <Route path="/therapist" element={<Guard role="THERAPIST"><TherapistLayout /></Guard>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<TherapistDashboard />} />
@@ -79,6 +93,7 @@ export default function App() {
         <Route path="prescriptions" element={<TherapistPrescriptions />} />
       </Route>
 
+      {/* Admin Routes */}
       <Route path="/admin" element={<Guard role="ADMIN"><AdminLayout /></Guard>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
@@ -86,7 +101,9 @@ export default function App() {
         <Route path="users" element={<AdminUsers />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* ✅ Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+
     </Routes>
   )
 }

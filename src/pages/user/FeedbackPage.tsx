@@ -1,204 +1,171 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { userApi } from '../../api'
-import toast from 'react-hot-toast'
-import { MessageCircle, Star, Check, Send } from 'lucide-react'
+import { useState } from "react";
+import { userApi } from "../../api";
+import toast from "react-hot-toast";
 
-function Stars({
-  val,
-  onChange,
-  label
-}: {
-  val: number
-  onChange: (v: number) => void
-  label: string
-}) {
+const COLORS = {
+  sage: "#8BAF8E",
+  sageLight: "#B8D4BB",
+  sageDark: "#4A7A52",
+  cream: "#F5F0E8",
+  warmWhite: "#FDFAF5",
+  deep: "#1A1F2E",
+  charcoal: "#3D4454",
+  gold: "#C9A96E",
+  goldLight: "#E8C98A",
+  muted: "#7A8090",
+  bg: "#F8F5EF",
+};
+
+const SOURCES = ["Google", "Friend/Family", "Social Media", "App Store", "Doctor Referral", "Other"];
+
+function StarRow({ val, onChange, label }) {
+  const [hovered, setHovered] = useState(0);
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-      <span className="text-sm font-medium text-text-secondary">{label}</span>
-      <div className="flex gap-1">
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 0", borderBottom: `1px solid rgba(26,31,46,0.07)` }}>
+      <span style={{ fontSize: 14, fontWeight: 400, color: COLORS.charcoal }}>{label}</span>
+      <div style={{ display: "flex", gap: 4 }}>
         {[1, 2, 3, 4, 5].map((s) => (
-          <motion.button
+          <button
             key={s}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
             type="button"
             onClick={() => onChange(s)}
-            className="p-1"
-          >
-            <Star
-              className={`w-6 h-6 transition-colors ${
-                s <= val ? 'text-accent-gold fill-accent-gold' : 'text-white/20'
-              }`}
-            />
-          </motion.button>
+            onMouseEnter={() => setHovered(s)}
+            onMouseLeave={() => setHovered(0)}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 26, lineHeight: 1, color: s <= (hovered || val) ? COLORS.gold : "rgba(26,31,46,0.15)", transition: "color 0.15s, transform 0.1s", transform: s <= hovered ? "scale(1.15)" : "scale(1)" }}
+          >★</button>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-const SOURCES = ['Google', 'Friend/Family', 'Social Media', 'App Store', 'Doctor Referral', 'Other']
-
 export default function FeedbackPage() {
-  const [r, setR] = useState({ quality: 0, helpfulness: 0, clarity: 0 })
-  const [source, setSource] = useState<string[]>([])
-  const [comment, setComment] = useState('')
-  const [anon, setAnon] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [r, setR] = useState({ quality: 0, helpfulness: 0, clarity: 0 });
+  const [source, setSource] = useState([]);
+  const [comment, setComment] = useState("");
+  const [anon, setAnon] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
 
-  function toggleSource(s: string) {
-    setSource((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]))
+  function toggleSource(s) {
+    setSource((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]));
   }
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!r.quality || !r.helpfulness || !r.clarity) {
-      toast.error('Rate all three categories')
-      return
-    }
-    setSubmitting(true)
+  async function submit(e) {
+    e.preventDefault();
+    if (!r.quality || !r.helpfulness || !r.clarity) { toast.error("Please rate all three categories"); return; }
+    setSubmitting(true);
     try {
-      await userApi.submitFeedback({
-        qualityRating: r.quality,
-        helpfulnessRating: r.helpfulness,
-        clarityRating: r.clarity,
-        source: source.join(', '),
-        comment,
-        isAnonymous: anon
-      })
-      toast.success('Feedback submitted! Thank you.')
-      setR({ quality: 0, helpfulness: 0, clarity: 0 })
-      setSource([])
-      setComment('')
-      setAnon(false)
-    } catch {
-      toast.error('Failed to submit')
-    } finally {
-      setSubmitting(false)
-    }
+      await userApi.submitFeedback({ qualityRating: r.quality, helpfulnessRating: r.helpfulness, clarityRating: r.clarity, source: source.join(", "), comment, isAnonymous: anon });
+      toast.success("Thank you for your feedback!");
+      setDone(true);
+    } catch { toast.error("Failed to submit"); }
+    finally { setSubmitting(false); }
   }
+
+  if (done) return (
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');`}</style>
+      <div style={{ textAlign: "center", maxWidth: 420 }}>
+        <div style={{ width: 88, height: 88, borderRadius: "50%", background: "linear-gradient(135deg, #B8D4BB, #8BAF8E)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, margin: "0 auto 28px" }}>✓</div>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: COLORS.deep, marginBottom: 14 }}>Feedback Received</h2>
+        <p style={{ fontSize: 16, color: COLORS.muted, fontWeight: 300, lineHeight: 1.7 }}>Thank you for helping us improve PsychoCare. Your voice matters to us.</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="max-w-xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Give Feedback</h1>
-        <p className="text-text-secondary">Help us improve PsychoCare</p>
-      </motion.div>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        * { box-sizing: border-box; }
+        .source-tag:hover { border-color: ${COLORS.sage} !important; background: rgba(139,175,142,0.08) !important; }
+        .source-tag { transition: all 0.2s ease; }
+        .submit-btn:hover { background: ${COLORS.sageDark} !important; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(74,122,82,0.2) !important; }
+        .submit-btn { transition: all 0.3s ease; }
+        .textarea-styled:focus { outline: none; border-color: ${COLORS.sage} !important; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
-      <form onSubmit={submit}>
-        {/* Rating */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card p-6 mb-4"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-gold to-yellow-500 flex items-center justify-center">
-              <Star className="w-5 h-5 text-white" />
+      <div style={{ maxWidth: 560 }}>
+        {/* Header */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: COLORS.sageDark, fontWeight: 500, marginBottom: 12 }}>Your Voice</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: COLORS.deep, lineHeight: 1.1, marginBottom: 8 }}>
+            Give <em style={{ fontStyle: "italic", color: COLORS.sageDark }}>Feedback</em>
+          </h1>
+          <p style={{ fontSize: 15, color: COLORS.muted, fontWeight: 300 }}>Help us make PsychoCare better for everyone.</p>
+        </div>
+
+        <form onSubmit={submit}>
+          {/* Rating */}
+          <div style={{ background: "white", borderRadius: 24, padding: 32, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>★</div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: COLORS.deep }}>Rate Your Experience</h2>
             </div>
-            <h2 className="font-bold text-white">Rate Your Experience</h2>
-          </div>
-          <Stars label="Quality" val={r.quality} onChange={(v) => setR((p) => ({ ...p, quality: v }))} />
-          <Stars label="Helpfulness" val={r.helpfulness} onChange={(v) => setR((p) => ({ ...p, helpfulness: v }))} />
-          <Stars label="Clarity" val={r.clarity} onChange={(v) => setR((p) => ({ ...p, clarity: v }))} />
-        </motion.div>
-
-        {/* Source */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card p-6 mb-4"
-        >
-          <h2 className="font-bold text-white mb-4">How did you hear about us?</h2>
-          <div className="flex flex-wrap gap-2">
-            {SOURCES.map((s) => (
-              <motion.button
-                key={s}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="button"
-                onClick={() => toggleSource(s)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  source.includes(s)
-                    ? 'bg-accent-purple text-white shadow-glow-sm'
-                    : 'bg-dark-500/50 text-text-secondary hover:text-white border border-white/10'
-                }`}
-              >
-                {s}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Comments */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card p-6 mb-4"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+            <StarRow label="Quality of Sessions" val={r.quality} onChange={(v) => setR((p) => ({ ...p, quality: v }))} />
+            <StarRow label="Helpfulness" val={r.helpfulness} onChange={(v) => setR((p) => ({ ...p, helpfulness: v }))} />
+            <div style={{ borderBottom: "none" }}>
+              <StarRow label="Clarity of Communication" val={r.clarity} onChange={(v) => setR((p) => ({ ...p, clarity: v }))} />
             </div>
-            <h2 className="font-bold text-white">Comments (optional)</h2>
           </div>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={4}
-            className="input-field resize-y"
-            placeholder="Share your experience..."
-          />
-        </motion.div>
 
-        {/* Anonymous */}
-        <motion.label
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex items-center gap-3 mb-6 cursor-pointer group"
-        >
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={anon}
-              onChange={(e) => setAnon(e.target.checked)}
-              className="sr-only peer"
+          {/* Source */}
+          <div style={{ background: "white", borderRadius: 24, padding: 32, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", marginBottom: 20 }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: COLORS.deep, marginBottom: 18 }}>How did you hear about us?</h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {SOURCES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="source-tag"
+                  onClick={() => toggleSource(s)}
+                  style={{ padding: "9px 20px", borderRadius: 100, fontSize: 13, fontWeight: 500, cursor: "pointer", border: `1.5px solid ${source.includes(s) ? COLORS.sageDark : "rgba(26,31,46,0.12)"}`, background: source.includes(s) ? "rgba(139,175,142,0.1)" : "transparent", color: source.includes(s) ? COLORS.sageDark : COLORS.charcoal, fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Comments */}
+          <div style={{ background: "white", borderRadius: 24, padding: 32, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(139,175,142,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>💬</div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: COLORS.deep }}>Comments <span style={{ color: COLORS.muted, fontWeight: 300, fontSize: 16 }}>(optional)</span></h2>
+            </div>
+            <textarea
+              className="textarea-styled"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={4}
+              placeholder="Share your experience in your own words..."
+              style={{ width: "100%", padding: "14px 16px", borderRadius: 14, border: `1.5px solid rgba(26,31,46,0.12)`, background: COLORS.warmWhite, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: COLORS.deep, resize: "vertical", lineHeight: 1.6 }}
             />
-            <div className="w-5 h-5 rounded border border-white/20 bg-dark-500/50 peer-checked:bg-accent-purple peer-checked:border-accent-purple transition-all flex items-center justify-center">
-              {anon && <Check className="w-3 h-3 text-white" />}
-            </div>
           </div>
-          <span className="text-sm text-text-secondary group-hover:text-white transition-colors">
-            Submit anonymously
-          </span>
-        </motion.label>
 
-        {/* Submit */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          type="submit"
-          disabled={submitting}
-          className="btn-primary w-full flex items-center justify-center gap-2"
-        >
-          {submitting ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <>
-              <Send className="w-4 h-4" />
-              Submit Feedback
-            </>
-          )}
-        </motion.button>
-      </form>
+          {/* Anonymous */}
+          <label style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28, cursor: "pointer" }}>
+            <div onClick={() => setAnon(!anon)} style={{ width: 22, height: 22, borderRadius: 7, border: `1.5px solid ${anon ? COLORS.sageDark : "rgba(26,31,46,0.2)"}`, background: anon ? COLORS.sageDark : "white", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
+              {anon && <span style={{ color: "white", fontSize: 12, lineHeight: 1 }}>✓</span>}
+            </div>
+            <span style={{ fontSize: 14, color: COLORS.charcoal, fontWeight: 400 }}>Submit anonymously</span>
+          </label>
+
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={submitting}
+            style={{ display: "flex", width: "100%", padding: "16px", borderRadius: 14, background: COLORS.deep, color: "white", border: "none", fontSize: 15, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 20px rgba(26,31,46,0.12)" }}
+          >
+            {submitting
+              ? <><div className="spin" style={{ width: 18, height: 18, border: "1.5px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%" }} /> Submitting...</>
+              : <>📤 Submit Feedback</>}
+          </button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }

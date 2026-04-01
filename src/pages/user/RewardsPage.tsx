@@ -17,120 +17,567 @@ export default function RewardsPage() {
   }, [])
 
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Rewards</h1>
-        <p className="text-text-secondary">Exclusive offers for PsychoCare users</p>
-      </motion.div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
 
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-2 border-accent-purple/30 border-t-accent-purple rounded-full animate-spin" />
-        </div>
-      ) : rewards.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-16 text-center"
-        >
-          <Award className="w-16 h-16 mx-auto text-text-muted mb-4" />
-          <p className="text-text-muted">No rewards available</p>
-          <p className="text-sm text-text-muted mt-2">Check back later for exclusive offers</p>
-        </motion.div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rewards.map((r: any, i: number) => (
+        .rp-root {
+          min-height: 100vh;
+          background: #F8F5EF;
+          font-family: 'DM Sans', sans-serif;
+          padding: 48px 28px 72px;
+        }
+
+        .rp-wrap {
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+
+        /* ── HEADER ── */
+        .rp-header {
+          text-align: center;
+          margin-bottom: 44px;
+        }
+        .rp-header-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 6px 18px;
+          background: rgba(139,175,142,0.12);
+          border: 1px solid rgba(139,175,142,0.3);
+          border-radius: 40px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 12px;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: #8BAF8E;
+          margin-bottom: 16px;
+        }
+        .rp-page-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 42px;
+          font-weight: 700;
+          color: #1A1F2E;
+          line-height: 1.1;
+          margin-bottom: 10px;
+        }
+        .rp-page-title em {
+          font-style: italic;
+          color: #4A7A52;
+        }
+        .rp-page-sub {
+          font-size: 15px;
+          color: #7A8090;
+          font-weight: 300;
+          max-width: 400px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+        .rp-header-line {
+          width: 60px;
+          height: 2px;
+          background: linear-gradient(90deg, #8BAF8E, transparent);
+          margin: 20px auto 0;
+          border-radius: 2px;
+        }
+
+        /* ── SUMMARY — same look as ud-stats ── */
+        .rp-summary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 40px;
+          margin-bottom: 36px;
+          padding: 22px 32px;
+          background: white;
+          border-radius: 20px;
+          border: 1px solid rgba(26,31,46,0.07);
+          box-shadow: 0 4px 20px rgba(26,31,46,0.05);
+          flex-wrap: wrap;
+        }
+        .rp-summary-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .rp-summary-value {
+          font-family: 'Playfair Display', serif;
+          font-size: 28px;
+          font-weight: 700;
+          color: #1A1F2E;
+          line-height: 1;
+        }
+        .rp-summary-label {
+          font-size: 13px;
+          color: #7A8090;
+          font-weight: 400;
+        }
+        .rp-summary-divider {
+          width: 1px;
+          height: 36px;
+          background: rgba(26,31,46,0.08);
+        }
+
+        /* ── SECTION HEAD — same as ud-section-head ── */
+        .rp-section-head {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+        .rp-section-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 22px;
+          font-weight: 700;
+          color: #1A1F2E;
+        }
+        .rp-section-sub {
+          font-size: 13px;
+          color: #7A8090;
+          font-weight: 300;
+        }
+
+        /* ── GRID ── */
+        .rp-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 16px;
+        }
+        @media (max-width: 560px) { .rp-grid { grid-template-columns: 1fr; } }
+
+        /* ── CARD — mirrors ud-card exactly ── */
+        .rp-card {
+          background: white;
+          border-radius: 20px;
+          border: 1px solid rgba(26,31,46,0.07);
+          box-shadow: 0 4px 20px rgba(26,31,46,0.04);
+          overflow: hidden;
+          transition: all 0.25s;
+          position: relative;
+        }
+        .rp-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: #4A7A52;
+          opacity: 0;
+          transition: opacity 0.25s;
+          pointer-events: none;
+          border-radius: inherit;
+          z-index: 0;
+        }
+        .rp-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 40px rgba(26,31,46,0.1);
+          border-color: #8BAF8E;
+        }
+        .rp-card:hover::before { opacity: 0.04; }
+
+        /* green top stripe */
+        .rp-card-stripe {
+          height: 4px;
+          background: linear-gradient(90deg, #4A7A52, #8BAF8E);
+          position: relative;
+          z-index: 1;
+        }
+
+        .rp-card-header {
+          padding: 20px 22px 16px;
+          border-bottom: 1px solid rgba(26,31,46,0.06);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* icon wrap — same as ud-card-icon-wrap */
+        .rp-icon-wrap {
+          width: 46px; height: 46px;
+          border-radius: 13px;
+          background: #4A7A5218;
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+
+        .rp-card-partner {
+          font-family: 'Playfair Display', serif;
+          font-size: 17px;
+          font-weight: 700;
+          color: #1A1F2E;
+          margin-bottom: 4px;
+          transition: color 0.2s;
+        }
+        .rp-card:hover .rp-card-partner { color: #4A7A52; }
+
+        .rp-card-desc {
+          font-size: 13px;
+          color: #7A8090;
+          font-weight: 300;
+          line-height: 1.5;
+        }
+
+        /* discount badge — green tint like ud-stat-icon bg */
+        .rp-discount-badge {
+          flex-shrink: 0;
+          background: #EDF3EE;
+          border: 1px solid rgba(74,122,82,0.2);
+          color: #4A7A52;
+          font-family: 'Playfair Display', serif;
+          font-size: 16px;
+          font-weight: 700;
+          padding: 8px 14px;
+          border-radius: 14px;
+          text-align: center;
+          line-height: 1.2;
+          white-space: nowrap;
+        }
+        .rp-discount-badge span {
+          display: block;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          color: #8BAF8E;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+        }
+
+        .rp-card-body {
+          padding: 18px 22px 22px;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* promo code box */
+        .rp-promo-box {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          background: #F8F5EF;
+          border: 1.5px dashed rgba(139,175,142,0.5);
+          border-radius: 12px;
+          margin-bottom: 14px;
+        }
+        .rp-promo-label {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 10px;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: #8BAF8E;
+          margin-bottom: 3px;
+        }
+        .rp-promo-code {
+          font-family: 'Playfair Display', serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #1A1F2E;
+          letter-spacing: 1px;
+        }
+        .rp-copy-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          background: #1A1F2E;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .rp-copy-btn:hover { background: #4A7A52; }
+
+        /* validity */
+        .rp-validity {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 12.5px;
+          color: #7A8090;
+          margin-bottom: 14px;
+        }
+
+        /* terms toggle — green */
+        .rp-terms-toggle {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 12.5px;
+          font-weight: 500;
+          color: #4A7A52;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          margin-bottom: 14px;
+          transition: color 0.2s;
+        }
+        .rp-terms-toggle:hover { color: #3D7A5A; }
+
+        .rp-terms-body {
+          font-size: 12.5px;
+          color: #7A8090;
+          line-height: 1.6;
+          padding: 12px 14px;
+          background: #EDF3EE;
+          border-radius: 10px;
+          margin-bottom: 14px;
+          overflow: hidden;
+        }
+
+        /* claim btn — dark → green on hover, same as copy */
+        .rp-claim-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 13px;
+          background: #1A1F2E;
+          color: white;
+          border: none;
+          border-radius: 14px;
+          font-size: 14px;
+          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+          transition: all 0.25s;
+          letter-spacing: 0.3px;
+        }
+        .rp-claim-btn:hover {
+          background: #4A7A52;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 24px rgba(74,122,82,0.25);
+        }
+
+        /* ── EMPTY ── */
+        .rp-empty {
+          text-align: center;
+          padding: 80px 40px;
+          background: white;
+          border-radius: 24px;
+          border: 1px solid rgba(26,31,46,0.07);
+          box-shadow: 0 4px 20px rgba(26,31,46,0.04);
+        }
+        .rp-empty-icon {
+          width: 72px; height: 72px;
+          border-radius: 50%;
+          background: #EDF3EE;
+          display: flex; align-items: center; justify-content: center;
+          margin: 0 auto 20px;
+        }
+        .rp-empty-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 22px;
+          font-weight: 700;
+          color: #1A1F2E;
+          margin-bottom: 8px;
+        }
+        .rp-empty-sub {
+          font-size: 14px;
+          color: #7A8090;
+          font-weight: 300;
+        }
+
+        /* ── LOADING ── */
+        .rp-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 280px;
+        }
+        .rp-spinner {
+          width: 36px; height: 36px;
+          border: 2.5px solid rgba(139,175,142,0.2);
+          border-top-color: #8BAF8E;
+          border-radius: 50%;
+          animation: rp-spin 0.8s linear infinite;
+        }
+        @keyframes rp-spin { to { transform: rotate(360deg); } }
+      `}</style>
+
+      <div className="rp-root">
+        <div className="rp-wrap">
+
+          {/* HEADER */}
+          <motion.div
+            className="rp-header"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="rp-header-badge">
+              <Award size={12} />
+              Exclusive Offers
+            </div>
+            <div className="rp-page-title">Your <em>Rewards</em></div>
+            <div className="rp-page-sub">
+              Unlock exclusive partner offers and claim your well-earned benefits
+            </div>
+            <div className="rp-header-line" />
+          </motion.div>
+
+          {/* SUMMARY */}
+          {!loading && rewards.length > 0 && (
             <motion.div
-              key={r.id}
-              initial={{ opacity: 0, y: 20 }}
+              className="rp-summary"
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card border-2 border-accent-gold/30 overflow-hidden"
+              transition={{ duration: 0.45, delay: 0.1 }}
             >
-              {/* Header with discount */}
-              <div className="bg-gradient-to-r from-accent-gold/20 to-yellow-500/10 p-4 border-b border-accent-gold/20">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-white">{r.partnerName}</h3>
-                    <p className="text-sm text-text-muted mt-1">{r.description}</p>
-                  </div>
-                  <span className="flex-shrink-0 bg-gradient-to-r from-accent-gold to-yellow-500 text-black text-sm font-bold px-3 py-1 rounded-lg">
-                    Rs. {r.discountValue} OFF
-                  </span>
-                </div>
+              <div className="rp-summary-item">
+                <div className="rp-summary-value">{rewards.length}</div>
+                <div className="rp-summary-label">Available Rewards</div>
               </div>
-
-              <div className="p-4">
-                {/* Promo Code */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-dark-600/50 border border-white/10 mb-3">
-                  <span className="font-mono font-bold text-lg text-gradient">{r.promoCode}</span>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      navigator.clipboard.writeText(r.promoCode)
-                      toast.success('Code copied!')
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-purple text-white text-xs font-medium"
-                  >
-                    <Copy className="w-3 h-3" />
-                    Copy
-                  </motion.button>
+              <div className="rp-summary-divider" />
+              <div className="rp-summary-item">
+                <div className="rp-summary-value">
+                  ₹{rewards.reduce((s: number, r: any) => s + (r.discountValue || 0), 0)}
                 </div>
-
-                {/* Valid till */}
-                {r.validTill && (
-                  <div className="flex items-center gap-2 text-sm text-text-muted mb-3">
-                    <Calendar className="w-4 h-4" />
-                    Valid till: {new Date(r.validTill).toLocaleDateString()}
-                  </div>
-                )}
-
-                {/* Terms toggle */}
-                <button
-                  onClick={() => setExpanded(expanded === r.id ? null : r.id)}
-                  className="flex items-center gap-1 text-sm text-accent-purple hover:text-accent-purple/80 transition-colors mb-3"
-                >
-                  {expanded === r.id ? (
-                    <>
-                      <ChevronUp className="w-4 h-4" />
-                      Hide Terms
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-4 h-4" />
-                      View Terms
-                    </>
-                  )}
-                </button>
-
-                <AnimatePresence>
-                  {expanded === r.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="text-sm text-text-muted mb-3 p-3 rounded-lg bg-dark-600/30"
-                    >
-                      {r.terms}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Claim button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full btn-gold flex items-center justify-center gap-2 py-2.5"
-                >
-                  <Gift className="w-4 h-4" />
-                  Claim Reward
-                </motion.button>
+                <div className="rp-summary-label">Total Savings</div>
+              </div>
+              <div className="rp-summary-divider" />
+              <div className="rp-summary-item">
+                <div className="rp-summary-value">
+                  {rewards.filter((r: any) => r.validTill && new Date(r.validTill) > new Date()).length}
+                </div>
+                <div className="rp-summary-label">Active Offers</div>
               </div>
             </motion.div>
-          ))}
+          )}
+
+          {/* CONTENT */}
+          {loading ? (
+            <div className="rp-loading"><div className="rp-spinner" /></div>
+          ) : rewards.length === 0 ? (
+            <motion.div
+              className="rp-empty"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="rp-empty-icon">
+                <Award size={30} style={{ color: '#4A7A52' }} />
+              </div>
+              <div className="rp-empty-title">No Rewards Yet</div>
+              <div className="rp-empty-sub">Check back later for exclusive partner offers</div>
+            </motion.div>
+          ) : (
+            <>
+              <div className="rp-section-head">
+                <div className="rp-section-title">All Offers</div>
+                <div className="rp-section-sub">{rewards.length} rewards available</div>
+              </div>
+
+              <motion.div
+                className="rp-grid"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+                }}
+              >
+                {rewards.map((r: any) => (
+                  <motion.div
+                    key={r.id}
+                    className="rp-card"
+                    variants={{
+                      hidden: { opacity: 0, y: 18 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+                    }}
+                  >
+                    <div className="rp-card-stripe" />
+
+                    <div className="rp-card-header">
+                      <div>
+                        <div className="rp-icon-wrap">
+                          <Gift size={20} style={{ color: '#4A7A52' }} />
+                        </div>
+                        <div className="rp-card-partner">{r.partnerName}</div>
+                        <div className="rp-card-desc">{r.description}</div>
+                      </div>
+                      <div className="rp-discount-badge">
+                        ₹{r.discountValue}
+                        <span>OFF</span>
+                      </div>
+                    </div>
+
+                    <div className="rp-card-body">
+                      <div className="rp-promo-box">
+                        <div>
+                          <div className="rp-promo-label">Promo Code</div>
+                          <div className="rp-promo-code">{r.promoCode}</div>
+                        </div>
+                        <motion.button
+                          className="rp-copy-btn"
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => {
+                            navigator.clipboard.writeText(r.promoCode)
+                            toast.success('Code copied!')
+                          }}
+                        >
+                          <Copy size={12} /> Copy
+                        </motion.button>
+                      </div>
+
+                      {r.validTill && (
+                        <div className="rp-validity">
+                          <Calendar size={13} />
+                          Valid till {new Date(r.validTill).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                      )}
+
+                      <button
+                        className="rp-terms-toggle"
+                        onClick={() => setExpanded(expanded === r.id ? null : r.id)}
+                      >
+                        {expanded === r.id
+                          ? <><ChevronUp size={14} /> Hide Terms</>
+                          : <><ChevronDown size={14} /> View Terms</>
+                        }
+                      </button>
+
+                      <AnimatePresence>
+                        {expanded === r.id && (
+                          <motion.div
+                            className="rp-terms-body"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {r.terms}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <motion.button
+                        className="rp-claim-btn"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Gift size={15} /> Claim Reward
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </>
+          )}
+
         </div>
-      )}
-    </div>
+      </div>
+    </>
   )
 }

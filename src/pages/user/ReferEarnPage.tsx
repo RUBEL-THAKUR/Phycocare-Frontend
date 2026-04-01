@@ -5,10 +5,68 @@ import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { Gift, Copy, Users, Calendar, Check, Wallet, Award } from 'lucide-react'
 
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+*, *::before, *::after { box-sizing: border-box; }
+
+.re-page { max-width: 760px; margin: 0 auto; font-family:'DM Sans',sans-serif; }
+.re-eyebrow { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:#8BAF8E; margin-bottom:5px; }
+.re-title   { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:#1A1F2E; margin-bottom:4px; }
+.re-sub     { font-size:13.5px; color:#7A8090; font-weight:300; margin-bottom:28px; }
+
+/* Hero referral card */
+.re-hero {
+  background:#1A1F2E; border-radius:22px; padding:28px;
+  margin-bottom:18px; position:relative; overflow:hidden;
+}
+.re-hero-g1 { position:absolute; width:220px; height:220px; background:radial-gradient(ellipse, rgba(139,175,142,0.15) 0%, transparent 65%); top:-60px; right:-60px; pointer-events:none; }
+.re-hero-g2 { position:absolute; width:160px; height:160px; background:radial-gradient(ellipse, rgba(201,169,110,0.1) 0%, transparent 65%); bottom:-40px; left:-40px; pointer-events:none; }
+.re-hero-inner { position:relative; z-index:1; }
+.re-hero-head { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+.re-hero-icon { width:44px; height:44px; border-radius:12px; background:rgba(201,169,110,0.15); border:1px solid rgba(201,169,110,0.25); display:flex; align-items:center; justify-content:center; }
+.re-hero-lbl { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:2px; }
+.re-hero-sub { font-size:10px; color:rgba(255,255,255,0.2); }
+.re-code-row { display:flex; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+.re-code { font-family:'Cormorant Garamond',serif; font-size:38px; font-weight:600; color:white; letter-spacing:4px; line-height:1; }
+.re-copy-btn {
+  display:flex; align-items:center; gap:7px; padding:9px 16px;
+  border-radius:10px; border:1px solid rgba(201,169,110,0.3);
+  background:rgba(201,169,110,0.1); color:#C9A96E;
+  font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition:all 0.18s;
+}
+.re-copy-btn:hover { background:rgba(201,169,110,0.2); }
+.re-hero-note { font-size:13px; color:rgba(255,255,255,0.35); }
+
+/* Stats */
+.re-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
+@media(max-width:550px){ .re-stats { grid-template-columns:1fr; } }
+.re-stat { background:white; border-radius:18px; padding:20px; text-align:center; border:1px solid rgba(26,31,46,0.08); box-shadow:0 4px 16px rgba(26,31,46,0.05); }
+.re-stat-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; }
+.re-stat-val  { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:#1A1F2E; }
+.re-stat-lbl  { font-size:12px; color:#7A8090; margin-top:2px; }
+
+/* History table */
+.re-card { background:white; border-radius:22px; padding:26px; border:1px solid rgba(26,31,46,0.08); box-shadow:0 4px 20px rgba(26,31,46,0.06); }
+.re-card-head { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.re-card-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:rgba(201,169,110,0.1); }
+.re-card-title { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:#1A1F2E; }
+.re-table { width:100%; border-collapse:collapse; }
+.re-thead th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; color:#7A8090; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid rgba(26,31,46,0.08); }
+.re-tr { border-bottom:1px solid rgba(26,31,46,0.05); transition:background 0.15s; }
+.re-tr:hover { background:rgba(139,175,142,0.04); }
+.re-td { padding:13px 14px; font-size:13.5px; color:#1A1F2E; }
+.re-td.muted { color:#7A8090; }
+.re-badge { display:inline-block; padding:3px 10px; border-radius:7px; font-size:12px; font-weight:600; }
+.re-badge.yes { background:rgba(74,122,82,0.1); color:#4A7A52; border:1px solid rgba(74,122,82,0.2); }
+.re-badge.no  { background:rgba(26,31,46,0.05); color:#7A8090; border:1px solid rgba(26,31,46,0.1); }
+.re-empty { text-align:center; padding:50px 20px; color:#7A8090; font-size:13.5px; }
+`
+
 export default function ReferEarnPage() {
-  const { user } = useAuthStore()
-  const [refs, setRefs] = useState<any[]>([])
-  const [copied, setCopied] = useState(false)
+  const { user }             = useAuthStore()
+  const [refs, setRefs]      = useState<any[]>([])
+  const [copied, setCopied]  = useState(false)
 
   useEffect(() => {
     userApi.getReferrals().then((r) => setRefs(r.data.data?.content || []))
@@ -22,173 +80,88 @@ export default function ReferEarnPage() {
   }
 
   const stats = [
-    { label: 'Total Referrals', value: refs.length, icon: Users },
-    { label: 'Sessions Booked', value: refs.filter((r) => r.sessionBooked).length, icon: Calendar },
-    {
-      label: 'Credits Earned',
-      value: 'Rs. ' + refs.filter((r) => r.creditIssued).length * 200,
-      icon: Wallet
-    }
+    { label: 'Total Referrals',  value: refs.length,                                    icon: Users,    bg:'rgba(74,122,82,0.1)',   color:'#4A7A52'  },
+    { label: 'Sessions Booked',  value: refs.filter(r => r.sessionBooked).length,        icon: Calendar, bg:'rgba(90,127,168,0.1)',  color:'#5A7FA8'  },
+    { label: 'Credits Earned',   value: '₹' + refs.filter(r => r.creditIssued).length * 200, icon: Wallet,   bg:'rgba(201,169,110,0.1)',color:'#C9A96E' },
   ]
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Refer & Earn</h1>
-        <p className="text-text-secondary">Earn Rs. 200 for every friend who books their first session</p>
-      </motion.div>
+    <>
+      <style>{CSS}</style>
+      <div className="re-page">
+        <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}>
+          <div className="re-eyebrow">Earn Together</div>
+          <div className="re-title">Refer & Earn</div>
+          <div className="re-sub">Earn ₹200 for every friend who books their first session</div>
+        </motion.div>
 
-      {/* Referral Code Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl p-6 mb-6"
-        style={{
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%)'
-        }}
-      >
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Gift className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-white/70 text-sm">Your Referral Code</p>
-              <p className="text-xs text-white/50">Share with friends and family</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-4xl font-bold text-white font-mono tracking-widest">
-              {user?.referralCode}
-            </span>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={copyCode}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium text-sm hover:bg-white/30 transition-colors"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? 'Copied!' : 'Copy'}
-            </motion.button>
-          </div>
-
-          <p className="text-white/60 text-sm mt-4">
-            When your friend signs up and books their first session, you earn Rs. 200!
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-3 gap-4 mb-6"
-      >
-        {stats.map((s, i) => {
-          const Icon = s.icon
-          return (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.05 }}
-              className="glass-card p-5 text-center"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary mx-auto mb-3 flex items-center justify-center">
-                <Icon className="w-5 h-5 text-white" />
+        {/* Referral Code Card */}
+        <motion.div className="re-hero" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1 }}>
+          <div className="re-hero-g1" /><div className="re-hero-g2" />
+          <div className="re-hero-inner">
+            <div className="re-hero-head">
+              <div className="re-hero-icon"><Gift size={20} color="#C9A96E" /></div>
+              <div>
+                <div className="re-hero-lbl">Your Referral Code</div>
+                <div className="re-hero-sub">Share with friends & family</div>
               </div>
-              <div className="text-2xl font-bold text-gradient">{s.value}</div>
-              <div className="text-xs text-text-muted mt-1">{s.label}</div>
-            </motion.div>
-          )
-        })}
-      </motion.div>
+            </div>
+            <div className="re-code-row">
+              <div className="re-code">{user?.referralCode}</div>
+              <button className="re-copy-btn" onClick={copyCode}>
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? 'Copied!' : 'Copy Code'}
+              </button>
+            </div>
+            <div className="re-hero-note">When your friend signs up & books a session — you earn ₹200!</div>
+          </div>
+        </motion.div>
 
-      {/* Referral History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="glass-card p-6"
-      >
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-gold to-yellow-500 flex items-center justify-center">
-            <Award className="w-5 h-5 text-white" />
-          </div>
-          <h2 className="font-bold text-white">Referral History</h2>
-        </div>
+        {/* Stats */}
+        <motion.div className="re-stats" initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.15 }}>
+          {stats.map(s => {
+            const Icon = s.icon
+            return (
+              <div key={s.label} className="re-stat">
+                <div className="re-stat-icon" style={{ background: s.bg }}>
+                  <Icon size={18} color={s.color} />
+                </div>
+                <div className="re-stat-val">{s.value}</div>
+                <div className="re-stat-lbl">{s.label}</div>
+              </div>
+            )
+          })}
+        </motion.div>
 
-        {refs.length === 0 ? (
-          <div className="text-center py-12">
-            <Gift className="w-12 h-12 mx-auto text-text-muted mb-3" />
-            <p className="text-text-muted">No referrals yet. Share your code to start earning!</p>
+        {/* History */}
+        <motion.div className="re-card" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }}>
+          <div className="re-card-head">
+            <div className="re-card-icon"><Award size={18} color="#C9A96E" /></div>
+            <div className="re-card-title">Referral History</div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Used By
-                  </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Session
-                  </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Credit
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {refs.map((r: any, i: number) => (
-                  <motion.tr
-                    key={r.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.03 }}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                  >
-                    <td className="py-4 px-4 text-white">
-                      {r.referredUser?.firstName} {r.referredUser?.lastName}
-                    </td>
-                    <td className="py-4 px-4 text-text-muted">
-                      {new Date(r.usedOn).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-lg ${
-                          r.sessionBooked
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                            : 'bg-white/10 text-text-muted border border-white/10'
-                        }`}
-                      >
-                        {r.sessionBooked ? 'Yes' : 'No'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`font-bold ${r.creditIssued ? 'text-green-400' : 'text-text-muted'}`}
-                      >
-                        {r.creditIssued ? '+Rs. ' + r.creditAmount : 'Pending'}
-                      </span>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </motion.div>
-    </div>
+          {refs.length === 0 ? (
+            <div className="re-empty"><Gift size={36} style={{ margin:'0 auto 12px', color:'#C0C5CE', display:'block' }} />No referrals yet. Share your code to start earning!</div>
+          ) : (
+            <div style={{ overflowX:'auto' }}>
+              <table className="re-table">
+                <thead className="re-thead"><tr><th>Used By</th><th>Date</th><th>Session</th><th>Credit</th></tr></thead>
+                <tbody>
+                  {refs.map((r: any, i: number) => (
+                    <motion.tr key={r.id} className="re-tr" initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.03 }}>
+                      <td className="re-td">{r.referredUser?.firstName} {r.referredUser?.lastName}</td>
+                      <td className="re-td muted">{new Date(r.usedOn).toLocaleDateString()}</td>
+                      <td className="re-td"><span className={`re-badge ${r.sessionBooked ? 'yes' : 'no'}`}>{r.sessionBooked ? 'Yes' : 'No'}</span></td>
+                      <td className="re-td" style={{ fontWeight:700, color: r.creditIssued ? '#4A7A52' : '#7A8090' }}>
+                        {r.creditIssued ? '+₹' + r.creditAmount : 'Pending'}
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </>
   )
 }

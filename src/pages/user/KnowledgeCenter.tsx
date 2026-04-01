@@ -1,143 +1,113 @@
-import { motion } from 'framer-motion'
-import { BookOpen, Play, Clock, Eye, User, Calendar } from 'lucide-react'
+import { motion } from "framer-motion";
+
+const COLORS = {
+  sage: "#8BAF8E",
+  sageLight: "#B8D4BB",
+  sageDark: "#4A7A52",
+  cream: "#F5F0E8",
+  warmWhite: "#FDFAF5",
+  deep: "#1A1F2E",
+  charcoal: "#3D4454",
+  gold: "#C9A96E",
+  muted: "#7A8090",
+  bg: "#F8F5EF",
+};
 
 const BLOGS = [
-  {
-    title: '5 Signs You May Need to Talk to a Therapist',
-    author: 'Dr. Sakshi Kochhar',
-    date: 'Oct 15, 2024',
-    tag: 'Mental Health',
-    text: 'Recognizing when professional help is needed is the first step to better mental health...'
-  },
-  {
-    title: 'Understanding Anxiety: Causes, Symptoms, and Treatment',
-    author: 'Ms. Siva Tharini',
-    date: 'Oct 12, 2024',
-    tag: 'Anxiety',
-    text: 'Anxiety disorders are among the most common mental health conditions worldwide...'
-  },
-  {
-    title: 'The Power of Mindfulness in Daily Life',
-    author: 'Ms. Sudipta Das',
-    date: 'Oct 8, 2024',
-    tag: 'Wellness',
-    text: 'Mindfulness is the practice of purposefully focusing your attention on the present moment...'
-  }
-]
+  { title: "5 Signs You May Need to Talk to a Therapist", author: "Dr. Sakshi Kochhar", date: "Oct 15, 2024", tag: "Mental Health", text: "Recognizing when professional help is needed is the first step to better mental health..." },
+  { title: "Understanding Anxiety: Causes, Symptoms, and Treatment", author: "Ms. Siva Tharini", date: "Oct 12, 2024", tag: "Anxiety", text: "Anxiety disorders are among the most common mental health conditions worldwide..." },
+  { title: "The Power of Mindfulness in Daily Life", author: "Ms. Sudipta Das", date: "Oct 8, 2024", tag: "Wellness", text: "Mindfulness is the practice of purposefully focusing your attention on the present moment..." },
+];
 
 const VIDEOS = [
-  { title: 'Introduction to Cognitive Behavioural Therapy', dur: '12:34', views: '2.4K' },
-  { title: 'Breathing Exercises for Anxiety Relief', dur: '8:20', views: '5.1K' },
-  { title: 'Understanding Depression: A Guide', dur: '15:45', views: '3.8K' },
-  { title: 'How to Build Mental Resilience', dur: '10:15', views: '1.9K' }
-]
+  { title: "Introduction to Cognitive Behavioural Therapy", dur: "12:34", views: "2.4K" },
+  { title: "Breathing Exercises for Anxiety Relief", dur: "8:20", views: "5.1K" },
+  { title: "Understanding Depression: A Guide", dur: "15:45", views: "3.8K" },
+  { title: "How to Build Mental Resilience", dur: "10:15", views: "1.9K" },
+];
+
+const TAG_COLORS = {
+  "Mental Health": { bg: "rgba(139,175,142,0.12)", color: COLORS.sageDark, border: "rgba(139,175,142,0.28)" },
+  Anxiety: { bg: "rgba(201,169,110,0.12)", color: "#8A6020", border: "rgba(201,169,110,0.28)" },
+  Wellness: { bg: "rgba(74,122,82,0.1)", color: COLORS.sageDark, border: "rgba(74,122,82,0.22)" },
+};
 
 export default function KnowledgeCenter() {
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Knowledge Center</h1>
-        <p className="text-text-secondary">Articles, videos, and resources for your mental wellness journey</p>
-      </motion.div>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        * { box-sizing: border-box; }
+        .blog-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(26,31,46,0.1) !important; border-color: rgba(139,175,142,0.2) !important; }
+        .blog-card { transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .video-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(26,31,46,0.1) !important; }
+        .video-card:hover .play-overlay { opacity: 1 !important; }
+        .video-card { transition: all 0.3s ease; }
+        .play-overlay { transition: opacity 0.25s ease; }
+      `}</style>
 
-      {/* Latest Articles */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="mb-10"
-      >
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-white" />
-          </div>
-          <h2 className="text-lg font-bold text-white">Latest Articles</h2>
+      {/* Header */}
+      <div style={{ marginBottom: 50 }}>
+        <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: COLORS.sageDark, fontWeight: 500, marginBottom: 12 }}>Learn & Grow</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: COLORS.deep, lineHeight: 1.1, marginBottom: 8 }}>
+          Knowledge <em style={{ fontStyle: "italic", color: COLORS.sageDark }}>Center</em>
+        </h1>
+        <p style={{ fontSize: 15, color: COLORS.muted, fontWeight: 300 }}>Articles, videos, and resources for your mental wellness journey.</p>
+      </div>
+
+      {/* Articles */}
+      <section style={{ marginBottom: 60 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: COLORS.deep, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📖</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: COLORS.deep }}>Latest Articles</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {BLOGS.map((b, i) => (
-            <motion.div
-              key={b.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.05 }}
-              whileHover={{ y: -4 }}
-              className="glass-card-hover p-5 cursor-pointer group"
-            >
-              <span className="inline-block text-xs bg-accent-purple/20 text-accent-purple px-3 py-1 rounded-full font-medium border border-accent-purple/30 mb-3">
-                {b.tag}
-              </span>
-              <h3 className="font-bold text-white mb-2 line-clamp-2 group-hover:text-gradient transition-colors">
-                {b.title}
-              </h3>
-              <p className="text-sm text-text-muted mb-4 line-clamp-2">{b.text}</p>
-              <div className="flex items-center justify-between text-xs text-text-muted pt-3 border-t border-white/10">
-                <span className="flex items-center gap-1.5">
-                  <User className="w-3 h-3" />
-                  {b.author}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3 h-3" />
-                  {b.date}
-                </span>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          {BLOGS.map((b, i) => {
+            const tc = TAG_COLORS[b.tag] || TAG_COLORS["Mental Health"];
+            return (
+              <div key={b.title} className="blog-card" style={{ background: "white", borderRadius: 24, padding: 32, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", cursor: "pointer" }}>
+                <span style={{ display: "inline-block", padding: "4px 14px", borderRadius: 100, fontSize: 11, fontWeight: 500, letterSpacing: "0.5px", background: tc.bg, color: tc.color, border: `1px solid ${tc.border}`, marginBottom: 18 }}>{b.tag}</span>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, fontWeight: 700, color: COLORS.deep, lineHeight: 1.3, marginBottom: 12 }}>{b.title}</h3>
+                <p style={{ fontSize: 14, color: COLORS.muted, lineHeight: 1.7, fontWeight: 300, marginBottom: 20, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{b.text}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 18, borderTop: `1px solid rgba(26,31,46,0.07)`, fontSize: 12, color: COLORS.muted }}>
+                  <span>👤 {b.author}</span>
+                  <span>📅 {b.date}</span>
+                </div>
               </div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
-      </motion.div>
+      </section>
 
       {/* Videos */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
-            <Play className="w-5 h-5 text-white" />
-          </div>
-          <h2 className="text-lg font-bold text-white">Videos</h2>
+      <section>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg, #C9A96E, #E8C98A)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>▶</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: COLORS.deep }}>Videos</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {VIDEOS.map((v, i) => (
-            <motion.div
-              key={v.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.05 }}
-              whileHover={{ y: -4 }}
-              className="glass-card-hover overflow-hidden cursor-pointer group"
-            >
-              {/* Thumbnail */}
-              <div className="relative h-32 bg-gradient-to-br from-accent-purple/20 to-accent-blue/20 flex items-center justify-center">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-accent-purple/80 transition-colors"
-                >
-                  <Play className="w-6 h-6 text-white ml-1" />
-                </motion.div>
-                <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/60 text-xs text-white font-medium">
-                  {v.dur}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18 }}>
+          {VIDEOS.map((v) => (
+            <div key={v.title} className="video-card" style={{ background: "white", borderRadius: 20, overflow: "hidden", border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", cursor: "pointer" }}>
+              <div style={{ height: 140, background: `linear-gradient(135deg, ${COLORS.sageLight}, ${COLORS.sage})`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>▶</div>
+                <div className="play-overlay" style={{ position: "absolute", inset: 0, background: "rgba(26,31,46,0.25)", opacity: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>▶</div>
+                </div>
+                <div style={{ position: "absolute", bottom: 10, right: 12, padding: "3px 10px", borderRadius: 6, background: "rgba(26,31,46,0.7)", fontSize: 11, color: "white", fontWeight: 500 }}>{v.dur}</div>
+              </div>
+              <div style={{ padding: "18px 18px 20px" }}>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 700, color: COLORS.deep, lineHeight: 1.4, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{v.title}</h3>
+                <div style={{ display: "flex", gap: 14, fontSize: 12, color: COLORS.muted }}>
+                  <span>⏱ {v.dur}</span>
+                  <span>👁 {v.views} views</span>
                 </div>
               </div>
-
-              {/* Info */}
-              <div className="p-4">
-                <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-accent-purple transition-colors">
-                  {v.title}
-                </h3>
-                <div className="flex items-center gap-4 text-xs text-text-muted">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {v.dur}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" />
-                    {v.views} views
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </section>
     </div>
-  )
+  );
 }

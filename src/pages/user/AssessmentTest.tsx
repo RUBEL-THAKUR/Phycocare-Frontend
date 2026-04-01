@@ -1,266 +1,236 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { userApi } from '../../api'
-import toast from 'react-hot-toast'
-import { ArrowLeft, CheckCircle2, Calendar, Sparkles } from 'lucide-react'
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { userApi } from "../../api";
+import toast from "react-hot-toast";
 
-const TESTS_MAP: Record<string, string> = {
-  addiction: 'Addiction Assessment',
-  adhd: 'ADHD Assessment',
-  'adjustment-disorder': 'Adjustment Disorder',
-  anxiety: 'Anxiety Assessment',
-  bipolar: 'Bipolar Disorder',
-  depression: 'Depression Assessment',
-  ocd: 'OCD Assessment',
-  ptsd: 'PTSD Assessment',
-  sleep: 'Sleep Disorder',
-  stress: 'Stress Assessment'
-}
+const COLORS = {
+  sage: "#8BAF8E",
+  sageLight: "#B8D4BB",
+  sageDark: "#4A7A52",
+  cream: "#F5F0E8",
+  warmWhite: "#FDFAF5",
+  deep: "#1A1F2E",
+  charcoal: "#3D4454",
+  gold: "#C9A96E",
+  muted: "#7A8090",
+  bg: "#F8F5EF",
+};
+
+const TESTS_MAP = {
+  addiction: "Addiction Assessment",
+  adhd: "ADHD Assessment",
+  "adjustment-disorder": "Adjustment Disorder",
+  anxiety: "Anxiety Assessment",
+  bipolar: "Bipolar Disorder",
+  depression: "Depression Assessment",
+  ocd: "OCD Assessment",
+  ptsd: "PTSD Assessment",
+  sleep: "Sleep Disorder",
+  stress: "Stress Assessment",
+};
 
 const QUESTIONS = [
-  'How often have you felt overwhelmed by daily activities?',
-  'How often have you had trouble concentrating?',
-  'How often have you felt hopeless or sad?',
-  'How often have you had difficulty sleeping?',
-  'How often have you felt anxious or worried?',
-  'How often have you avoided social situations?',
-  'How often have you had physical symptoms like headaches or fatigue?'
-]
+  "How often have you felt overwhelmed by daily activities?",
+  "How often have you had trouble concentrating?",
+  "How often have you felt hopeless or sad?",
+  "How often have you had difficulty sleeping?",
+  "How often have you felt anxious or worried?",
+  "How often have you avoided social situations?",
+  "How often have you had physical symptoms like headaches or fatigue?",
+];
 
 const OPTS = [
-  { l: 'Not at all', v: 0 },
-  { l: 'Several days', v: 1 },
-  { l: 'More than half the days', v: 2 },
-  { l: 'Nearly every day', v: 3 }
-]
+  { l: "Not at all", v: 0 },
+  { l: "Several days", v: 1 },
+  { l: "More than half the days", v: 2 },
+  { l: "Nearly every day", v: 3 },
+];
 
-function label(score: number) {
-  return score <= 4 ? 'Minimal' : score <= 9 ? 'Mild' : score <= 14 ? 'Moderate' : 'Severe'
+function scorelabel(score) {
+  return score <= 4 ? "Minimal" : score <= 9 ? "Mild" : score <= 14 ? "Moderate" : "Severe";
 }
 
-function labelColor(l: string) {
-  switch (l) {
-    case 'Minimal': return 'from-emerald-500 to-teal-500'
-    case 'Mild': return 'from-yellow-500 to-orange-500'
-    case 'Moderate': return 'from-orange-500 to-red-500'
-    case 'Severe': return 'from-red-500 to-pink-500'
-    default: return 'from-neon-pink to-neon-purple'
-  }
+function labelStyle(l) {
+  const map = {
+    Minimal: { bg: "rgba(74,122,82,0.1)", color: COLORS.sageDark, border: "rgba(74,122,82,0.2)" },
+    Mild: { bg: "rgba(201,169,110,0.12)", color: "#8A6020", border: "rgba(201,169,110,0.3)" },
+    Moderate: { bg: "rgba(200,100,30,0.1)", color: "#8A4010", border: "rgba(200,100,30,0.25)" },
+    Severe: { bg: "rgba(200,50,50,0.1)", color: "#9A2020", border: "rgba(200,50,50,0.25)" },
+  };
+  return map[l] || map.Minimal;
 }
 
 export default function AssessmentTest() {
-  const { slug } = useParams<{ slug: string }>()
-  const name = TESTS_MAP[slug || ''] || 'Assessment'
-  const [answers, setAnswers] = useState<Record<number, number>>({})
-  const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<{ score: number; label: string } | null>(null)
-  const navigate = useNavigate()
+  const { slug } = useParams();
+  const name = TESTS_MAP[slug || ""] || "Assessment";
+  const [answers, setAnswers] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState(null);
+  const navigate = useNavigate();
 
   async function submit() {
     if (Object.keys(answers).length < QUESTIONS.length) {
-      toast.error('Answer all questions')
-      return
+      toast.error("Please answer all questions");
+      return;
     }
-    const score = Object.values(answers).reduce((s, v) => s + v, 0)
-    const l = label(score)
-    setSubmitting(true)
+    const score = Object.values(answers).reduce((s, v) => s + v, 0);
+    const l = scorelabel(score);
+    setSubmitting(true);
     try {
       await userApi.submitAssessment({
         testName: name,
         testSlug: slug,
         score,
         resultLabel: l,
-        answers: JSON.stringify(answers)
-      })
-      setResult({ score, label: l })
-      toast.success('Assessment saved!')
+        answers: JSON.stringify(answers),
+      });
+      setResult({ score, label: l });
+      toast.success("Assessment saved!");
     } catch {
-      toast.error('Failed to save')
+      toast.error("Failed to save");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
-  if (result)
+  const progress = (Object.keys(answers).length / QUESTIONS.length) * 100;
+
+  if (result) {
+    const ls = labelStyle(result.label);
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md mx-auto"
-      >
-        <div className="glass-card p-8 text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', delay: 0.2 }}
-            className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center"
-          >
-            <CheckCircle2 className="w-10 h-10 text-white" />
-          </motion.div>
+      <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+          * { box-sizing: border-box; }
+          .result-back-btn:hover { background: ${COLORS.cream} !important; }
+          .result-back-btn { transition: background 0.2s ease; }
+          .result-book-btn:hover { background: ${COLORS.sageDark} !important; transform: translateY(-1px); }
+          .result-book-btn { transition: all 0.25s ease; }
+        `}</style>
+        <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
+          <div style={{ width: 90, height: 90, borderRadius: "50%", background: `linear-gradient(135deg, ${COLORS.sageLight}, ${COLORS.sage})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, margin: "0 auto 28px", boxShadow: "0 12px 40px rgba(139,175,142,0.3)" }}>✓</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: COLORS.deep, marginBottom: 8 }}>
+            Assessment <em style={{ fontStyle: "italic", color: COLORS.sageDark }}>Complete</em>
+          </h2>
+          <p style={{ fontSize: 14, color: COLORS.muted, marginBottom: 32, fontWeight: 300 }}>{name}</p>
 
-          <h2 className="text-2xl font-bold text-white mb-2">Assessment Complete</h2>
-          <p className="text-white/60 mb-8">{name}</p>
+          <div style={{ background: "white", borderRadius: 24, padding: 36, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 4px 30px rgba(26,31,46,0.06)", marginBottom: 20 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: COLORS.muted, marginBottom: 16, fontWeight: 600 }}>Your Score</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: COLORS.deep, lineHeight: 1, marginBottom: 16 }}>{result.score}</div>
+            <div style={{ display: "inline-block", padding: "9px 26px", borderRadius: 100, background: ls.bg, color: ls.color, border: `1px solid ${ls.border}`, fontSize: 15, fontWeight: 600 }}>{result.label}</div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className={`rounded-2xl p-6 mb-8 bg-gradient-to-br ${labelColor(result.label)} bg-opacity-20`}
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            <div className="text-xs text-white/50 uppercase tracking-wider mb-2">Your Score</div>
-            <div className={`text-5xl font-black bg-gradient-to-r ${labelColor(result.label)} bg-clip-text text-transparent`}>
-              {result.score}
-            </div>
-            <div className="text-lg font-semibold text-white mt-2">{result.label}</div>
-          </motion.div>
-
-          <div className="flex gap-4">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/user/assessments')}
-              className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white/70 hover:bg-white/5 transition-all font-medium"
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <button
+              className="result-back-btn"
+              onClick={() => navigate("/user/assessments")}
+              style={{ padding: "14px", borderRadius: 14, border: `1.5px solid rgba(26,31,46,0.12)`, background: "white", color: COLORS.charcoal, fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
             >
-              Back to Assessments
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(233,30,140,0.4)' }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/user/book-session')}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple text-white font-semibold flex items-center justify-center gap-2"
+              ← Back
+            </button>
+            <button
+              className="result-book-btn"
+              onClick={() => navigate("/user/book-session")}
+              style={{ padding: "14px", borderRadius: 14, background: COLORS.deep, color: "white", border: "none", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
             >
-              <Calendar className="w-4 h-4" />
-              Book Session
-            </motion.button>
+              📅 Book Session
+            </button>
           </div>
         </div>
-      </motion.div>
-    )
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="max-w-2xl mx-auto"
-    >
-      <motion.button
-        whileHover={{ x: -5 }}
-        onClick={() => navigate('/user/assessments')}
-        className="flex items-center gap-2 text-neon-pink hover:text-neon-purple transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Back to Assessments</span>
-      </motion.button>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        * { box-sizing: border-box; }
+        .opt-label:hover { border-color: ${COLORS.sage} !important; background: rgba(139,175,142,0.05) !important; }
+        .opt-label { transition: all 0.2s ease; cursor: pointer; }
+        .submit-btn:hover:not(:disabled) { background: ${COLORS.sageDark} !important; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(74,122,82,0.2) !important; }
+        .submit-btn { transition: all 0.3s ease; }
+        .back-link:hover { color: ${COLORS.deep} !important; }
+        .back-link { transition: color 0.2s ease; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-6 mb-6"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-white">{name}</h1>
-        </div>
+      <div style={{ maxWidth: 700 }}>
+        {/* Back */}
+        <button
+          className="back-link"
+          onClick={() => navigate("/user/assessments")}
+          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: COLORS.sageDark, border: "none", background: "none", cursor: "pointer", marginBottom: 32, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
+        >
+          ← Back to Assessments
+        </button>
 
-        <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-neon-pink to-neon-purple rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${(Object.keys(answers).length / QUESTIONS.length) * 100}%` }}
-            transition={{ type: 'spring', stiffness: 100 }}
-          />
-        </div>
-        <div className="text-sm text-white/50 mt-2">
-          {Object.keys(answers).length} of {QUESTIONS.length} questions answered
-        </div>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        {QUESTIONS.map((q, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="glass-card p-5 mb-4"
-          >
-            <p className="font-semibold text-white mb-4">
-              <span className="text-neon-pink mr-2">{i + 1}.</span>
-              {q}
-            </p>
-            <div className="space-y-2">
-              {OPTS.map(o => (
-                <motion.label
-                  key={o.v}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                    answers[i] === o.v
-                      ? 'bg-gradient-to-r from-neon-pink/20 to-neon-purple/20 border border-neon-pink/50'
-                      : 'bg-white/5 border border-transparent hover:bg-white/10'
-                  }`}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                      answers[i] === o.v ? 'border-neon-pink bg-neon-pink' : 'border-white/30'
-                    }`}
-                  >
-                    {answers[i] === o.v && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="w-2 h-2 rounded-full bg-white"
-                      />
-                    )}
-                  </div>
-                  <input
-                    type="radio"
-                    name={`q${i}`}
-                    checked={answers[i] === o.v}
-                    onChange={() => setAnswers(a => ({ ...a, [i]: o.v }))}
-                    className="sr-only"
-                  />
-                  <span className={`text-sm ${answers[i] === o.v ? 'text-white' : 'text-white/70'}`}>
-                    {o.l}
-                  </span>
-                </motion.label>
-              ))}
+        {/* Progress Card */}
+        <div style={{ background: "white", borderRadius: 24, padding: 28, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: `linear-gradient(135deg, ${COLORS.sageLight}, ${COLORS.sage})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>✦</div>
+            <div>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: COLORS.deep }}>{name}</h1>
+              <p style={{ fontSize: 12, color: COLORS.muted, fontWeight: 300, marginTop: 2 }}>Answer all questions honestly for accurate results</p>
             </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+          </div>
+          <div style={{ height: 6, background: "rgba(26,31,46,0.06)", borderRadius: 100, overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 100, background: `linear-gradient(90deg, ${COLORS.sage}, ${COLORS.sageDark})`, width: `${progress}%`, transition: "width 0.4s cubic-bezier(0.25,0.46,0.45,0.94)" }} />
+          </div>
+          <div style={{ fontSize: 13, color: COLORS.muted, marginTop: 10, fontWeight: 300 }}>
+            {Object.keys(answers).length} of {QUESTIONS.length} questions answered
+          </div>
+        </div>
 
-      <motion.button
-        whileHover={{
-          scale: Object.keys(answers).length < QUESTIONS.length ? 1 : 1.02,
-          boxShadow: Object.keys(answers).length < QUESTIONS.length ? 'none' : '0 0 30px rgba(233,30,140,0.4)'
-        }}
-        whileTap={{ scale: Object.keys(answers).length < QUESTIONS.length ? 1 : 0.98 }}
-        onClick={submit}
-        disabled={submitting || Object.keys(answers).length < QUESTIONS.length}
-        className={`w-full py-4 rounded-xl font-semibold text-white transition-all ${
-          Object.keys(answers).length < QUESTIONS.length
-            ? 'bg-white/10 cursor-not-allowed opacity-50'
-            : 'bg-gradient-to-r from-neon-pink to-neon-purple cursor-pointer'
-        }`}
-      >
-        {submitting ? (
-          <span className="flex items-center justify-center gap-2">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-            />
-            Submitting...
-          </span>
-        ) : (
-          'Submit Assessment'
-        )}
-      </motion.button>
-    </motion.div>
-  )
+        {/* Questions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+          {QUESTIONS.map((q, i) => (
+            <div
+              key={i}
+              style={{ background: "white", borderRadius: 20, padding: "26px 28px", border: `1px solid ${answers[i] !== undefined ? "rgba(139,175,142,0.2)" : "rgba(26,31,46,0.07)"}`, boxShadow: "0 2px 12px rgba(26,31,46,0.03)", transition: "border-color 0.2s ease" }}
+            >
+              <p style={{ fontSize: 15, fontWeight: 500, color: COLORS.deep, marginBottom: 18, lineHeight: 1.6 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: COLORS.sageDark, marginRight: 8 }}>{i + 1}.</span>
+                {q}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {OPTS.map((o) => (
+                  <label
+                    key={o.v}
+                    className="opt-label"
+                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 12, border: `1.5px solid ${answers[i] === o.v ? COLORS.sageDark : "rgba(26,31,46,0.1)"}`, background: answers[i] === o.v ? "rgba(139,175,142,0.08)" : "transparent" }}
+                  >
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: `1.5px solid ${answers[i] === o.v ? COLORS.sageDark : "rgba(26,31,46,0.2)"}`, background: answers[i] === o.v ? COLORS.sageDark : "white", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s", flexShrink: 0 }}>
+                      {answers[i] === o.v && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "white" }} />}
+                    </div>
+                    <input
+                      type="radio"
+                      name={`q${i}`}
+                      checked={answers[i] === o.v}
+                      onChange={() => setAnswers((a) => ({ ...a, [i]: o.v }))}
+                      style={{ display: "none" }}
+                    />
+                    <span style={{ fontSize: 14, color: answers[i] === o.v ? COLORS.deep : COLORS.charcoal, fontWeight: answers[i] === o.v ? 500 : 400 }}>{o.l}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Submit */}
+        <button
+          className="submit-btn"
+          onClick={submit}
+          disabled={submitting || Object.keys(answers).length < QUESTIONS.length}
+          style={{ display: "flex", width: "100%", padding: "17px", borderRadius: 14, background: Object.keys(answers).length < QUESTIONS.length ? "rgba(26,31,46,0.22)" : COLORS.deep, color: "white", border: "none", fontSize: 15, fontWeight: 500, cursor: Object.keys(answers).length < QUESTIONS.length ? "not-allowed" : "pointer", fontFamily: "'DM Sans', sans-serif", alignItems: "center", justifyContent: "center", gap: 8 }}
+        >
+          {submitting
+            ? <><div className="spin" style={{ width: 18, height: 18, border: "1.5px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%" }} /> Submitting...</>
+            : "Submit Assessment →"}
+        </button>
+      </div>
+    </div>
+  );
 }

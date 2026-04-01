@@ -1,150 +1,170 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { userApi } from '../../api'
-import { ClipboardCheck, CheckCircle, ArrowRight, Trophy } from 'lucide-react'
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { userApi } from "../../api";
+
+const COLORS = {
+  sage: "#8BAF8E",
+  sageLight: "#B8D4BB",
+  sageDark: "#4A7A52",
+  cream: "#F5F0E8",
+  warmWhite: "#FDFAF5",
+  deep: "#1A1F2E",
+  charcoal: "#3D4454",
+  gold: "#C9A96E",
+  muted: "#7A8090",
+  bg: "#F8F5EF",
+};
 
 const TESTS = [
-  { slug: 'addiction', name: 'Addiction Assessment', desc: 'Evaluate substance use patterns and addiction risk.' },
-  { slug: 'adhd', name: 'ADHD Assessment', desc: 'Screen for attention deficit and hyperactivity symptoms.' },
-  { slug: 'adjustment-disorder', name: 'Adjustment Disorder', desc: 'Assess difficulty coping with life changes.' },
-  { slug: 'anxiety', name: 'Anxiety Assessment', desc: 'Measure generalized anxiety disorder symptoms.' },
-  { slug: 'bipolar', name: 'Bipolar Disorder', desc: 'Screen for mood swings and bipolar symptoms.' },
-  { slug: 'depression', name: 'Depression Assessment', desc: 'Evaluate depressive episode severity.' },
-  { slug: 'ocd', name: 'OCD Assessment', desc: 'Screen for obsessive-compulsive disorder patterns.' },
-  { slug: 'ptsd', name: 'PTSD Assessment', desc: 'Assess post-traumatic stress disorder symptoms.' },
-  { slug: 'sleep', name: 'Sleep Disorder', desc: 'Evaluate sleep quality and insomnia severity.' },
-  { slug: 'stress', name: 'Stress Assessment', desc: 'Measure perceived stress levels in daily life.' }
-]
+  { slug: "addiction", name: "Addiction Assessment", desc: "Evaluate substance use patterns and addiction risk." },
+  { slug: "adhd", name: "ADHD Assessment", desc: "Screen for attention deficit and hyperactivity symptoms." },
+  { slug: "adjustment-disorder", name: "Adjustment Disorder", desc: "Assess difficulty coping with life changes." },
+  { slug: "anxiety", name: "Anxiety Assessment", desc: "Measure generalized anxiety disorder symptoms." },
+  { slug: "bipolar", name: "Bipolar Disorder", desc: "Screen for mood swings and bipolar symptoms." },
+  { slug: "depression", name: "Depression Assessment", desc: "Evaluate depressive episode severity." },
+  { slug: "ocd", name: "OCD Assessment", desc: "Screen for obsessive-compulsive disorder patterns." },
+  { slug: "ptsd", name: "PTSD Assessment", desc: "Assess post-traumatic stress disorder symptoms." },
+  { slug: "sleep", name: "Sleep Disorder", desc: "Evaluate sleep quality and insomnia severity." },
+  { slug: "stress", name: "Stress Assessment", desc: "Measure perceived stress levels in daily life." },
+];
+
+function labelStyle(l) {
+  const map = {
+    Minimal: { bg: "rgba(74,122,82,0.1)", color: COLORS.sageDark, border: "rgba(74,122,82,0.2)" },
+    Mild: { bg: "rgba(201,169,110,0.12)", color: "#8A6020", border: "rgba(201,169,110,0.3)" },
+    Moderate: { bg: "rgba(200,100,30,0.1)", color: "#8A4010", border: "rgba(200,100,30,0.25)" },
+    Severe: { bg: "rgba(200,50,50,0.1)", color: "#9A2020", border: "rgba(200,50,50,0.25)" },
+  };
+  return map[l] || map.Minimal;
+}
 
 export default function AssessmentsPage() {
-  const [tab, setTab] = useState<'available' | 'completed'>('available')
-  const [completed, setCompleted] = useState<any[]>([])
-  const navigate = useNavigate()
+  const [tab, setTab] = useState("available");
+  const [completed, setCompleted] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    userApi.getCompletedAssessments().then((r) => setCompleted(r.data.data || []))
-  }, [])
+    userApi.getCompletedAssessments().then((r) => setCompleted(r.data.data || []));
+  }, []);
 
-  const doneSet = new Set(completed.map((a: any) => a.testSlug))
+  const doneSet = new Set(completed.map((a) => a.testSlug));
 
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Self Assessment</h1>
-        <p className="text-text-secondary">Evidence-based mental health assessments</p>
-      </motion.div>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, fontFamily: "'DM Sans', sans-serif", padding: "48px 40px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        * { box-sizing: border-box; }
+        .test-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(26,31,46,0.1) !important; border-color: rgba(139,175,142,0.25) !important; }
+        .test-card { transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .begin-btn:hover { background: ${COLORS.sageDark} !important; }
+        .begin-btn { transition: background 0.2s ease; }
+        .tab-btn:hover { color: ${COLORS.deep} !important; }
+        .tab-btn { transition: all 0.25s ease; }
+        .completed-row:hover { box-shadow: 0 8px 30px rgba(26,31,46,0.08) !important; }
+        .completed-row { transition: box-shadow 0.25s ease; }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ marginBottom: 36 }}>
+        <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: COLORS.sageDark, fontWeight: 500, marginBottom: 12 }}>Know Yourself</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: COLORS.deep, lineHeight: 1.1, marginBottom: 8 }}>
+          Self <em style={{ fontStyle: "italic", color: COLORS.sageDark }}>Assessment</em>
+        </h1>
+        <p style={{ fontSize: 15, color: COLORS.muted, fontWeight: 300 }}>Evidence-based mental health assessments designed by clinical psychologists.</p>
+      </div>
 
       {/* Tabs */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex gap-3 mb-6"
-      >
-        {(['available', 'completed'] as const).map((t) => (
-          <motion.button
-            key={t}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setTab(t)}
-            className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-              tab === t
-                ? 'bg-gradient-primary text-white shadow-glow-sm'
-                : 'bg-dark-500/50 text-text-secondary hover:text-white border border-white/10'
-            }`}
+      <div style={{ display: "flex", gap: 10, marginBottom: 36 }}>
+        {[["available", "Available Tests"], ["completed", `Completed (${completed.length})`]].map(([key, label]) => (
+          <button
+            key={key}
+            className="tab-btn"
+            onClick={() => setTab(key)}
+            style={{ padding: "10px 24px", borderRadius: 100, fontSize: 13, fontWeight: 500, border: `1.5px solid ${tab === key ? COLORS.sageDark : "rgba(26,31,46,0.12)"}`, background: tab === key ? COLORS.deep : "white", color: tab === key ? "white" : COLORS.charcoal, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
           >
-            {t === 'available' ? 'Available Tests' : `Completed (${completed.length})`}
-          </motion.button>
+            {label}
+          </button>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Content */}
-      {tab === 'available' ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-        >
-          {TESTS.map((t, i) => (
-            <motion.div
+      {/* Available Tests Grid */}
+      {tab === "available" && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18 }}>
+          {TESTS.map((t) => (
+            <div
               key={t.slug}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -4 }}
-              className="glass-card-hover p-5 group"
+              className="test-card"
+              style={{ background: "white", borderRadius: 22, padding: 26, border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)" }}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow-sm">
-                  <ClipboardCheck className="w-5 h-5 text-white" />
-                </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: `linear-gradient(135deg, ${COLORS.sageLight}, ${COLORS.sage})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>📋</div>
                 {doneSet.has(t.slug) && (
-                  <span className="flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-lg border border-green-500/30">
-                    <CheckCircle className="w-3 h-3" />
-                    Done
-                  </span>
+                  <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: "rgba(74,122,82,0.1)", color: COLORS.sageDark, border: `1px solid rgba(74,122,82,0.2)`, fontWeight: 500 }}>✓ Done</span>
                 )}
               </div>
-              <h3 className="font-bold text-white mb-2">{t.name}</h3>
-              <p className="text-sm text-text-muted mb-4 line-clamp-2">{t.desc}</p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: COLORS.deep, marginBottom: 8, lineHeight: 1.3 }}>{t.name}</h3>
+              <p style={{ fontSize: 13, color: COLORS.muted, lineHeight: 1.6, fontWeight: 300, marginBottom: 20, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{t.desc}</p>
+              <button
+                className="begin-btn"
                 onClick={() => navigate(`/user/assessments/${t.slug}`)}
-                className="w-full btn-primary py-2 text-sm flex items-center justify-center gap-2"
+                style={{ display: "flex", width: "100%", padding: "11px", borderRadius: 12, background: COLORS.deep, color: "white", border: "none", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", alignItems: "center", justifyContent: "center", gap: 6 }}
               >
-                {doneSet.has(t.slug) ? 'Retake Test' : 'Begin Test'}
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </motion.div>
+                {doneSet.has(t.slug) ? "Retake →" : "Begin →"}
+              </button>
+            </div>
           ))}
-        </motion.div>
-      ) : completed.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-16 text-center"
-        >
-          <ClipboardCheck className="w-16 h-16 mx-auto text-text-muted mb-4" />
-          <p className="text-text-muted">No completed assessments yet</p>
-          <p className="text-sm text-text-muted mt-2">Take your first assessment to track your mental health</p>
-        </motion.div>
-      ) : (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-          {completed.map((a: any, i: number) => (
-            <motion.div
-              key={a.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card p-5 flex items-center justify-between"
+        </div>
+      )}
+
+      {/* Completed Tab */}
+      {tab === "completed" && (
+        completed.length === 0 ? (
+          <div style={{ background: "white", borderRadius: 24, padding: "80px 40px", textAlign: "center", border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 16px rgba(26,31,46,0.04)" }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 72, color: "rgba(139,175,142,0.3)", marginBottom: 20, lineHeight: 1 }}>📋</div>
+            <p style={{ fontSize: 16, color: COLORS.muted }}>No completed assessments yet</p>
+            <p style={{ fontSize: 14, color: COLORS.muted, marginTop: 8, fontWeight: 300 }}>Take your first assessment to understand your mental health better.</p>
+            <button
+              onClick={() => setTab("available")}
+              style={{ marginTop: 24, padding: "12px 28px", borderRadius: 100, background: COLORS.deep, color: "white", border: "none", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow-sm">
-                  <Trophy className="w-6 h-6 text-white" />
+              Explore Tests →
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {completed.map((a) => {
+              const ls = labelStyle(a.resultLabel);
+              return (
+                <div
+                  key={a.id}
+                  className="completed-row"
+                  style={{ background: "white", borderRadius: 20, padding: "22px 28px", border: `1px solid rgba(26,31,46,0.07)`, boxShadow: "0 2px 12px rgba(26,31,46,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: `linear-gradient(135deg, ${COLORS.sageLight}, ${COLORS.sage})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏆</div>
+                    <div>
+                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: COLORS.deep, marginBottom: 4 }}>{a.testName}</h3>
+                      <p style={{ fontSize: 13, color: COLORS.muted, fontWeight: 300 }}>
+                        📅 {new Date(a.takenAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    {a.score !== undefined && (
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, color: COLORS.deep, lineHeight: 1, marginBottom: 6 }}>{a.score}</div>
+                    )}
+                    {a.resultLabel && (
+                      <span style={{ fontSize: 12, padding: "4px 14px", borderRadius: 100, background: ls.bg, color: ls.color, border: `1px solid ${ls.border}`, fontWeight: 500 }}>
+                        {a.resultLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-white">{a.testName}</h3>
-                  <p className="text-sm text-text-muted">
-                    {new Date(a.takenAt).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                {a.score !== undefined && (
-                  <div className="text-3xl font-bold text-gradient">{a.score}</div>
-                )}
-                {a.resultLabel && <div className="text-sm text-text-muted">{a.resultLabel}</div>}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              );
+            })}
+          </div>
+        )
       )}
     </div>
-  )
+  );
 }
